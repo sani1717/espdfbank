@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ევროპული სკოლის საბაზო საფეხურის წიგნები</title>
+  <style>
+    :root{
+      --blue:#1d4ed8;
+      --blue-50:#eff6ff;
+      --indigo-50:#eef2ff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --white:#ffffff;
+      --radius:18px;
+      --yellow:#facc15;
+      --danger:#dc2626;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:var(--white);
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+    }
+
+    header{padding:32px 16px 6px; text-align:center;}
+    h1{margin:0 0 8px; font-size:clamp(22px,3vw,36px); font-weight:800; color:#000}
+    .subtitle{color:var(--muted); font-size:14px;}
+
+    .hidden{display:none !important;}
+
+    .home-grid{display:flex; justify-content:center; gap:28px; flex-wrap:wrap; padding:28px 16px 12px;}
+    .grade-btn{
+      width:min(320px,90vw);
+      height:160px;
+      border-radius:var(--radius);
+      cursor:pointer;
+      background:linear-gradient(180deg,var(--blue-50),#ffffff);
+      border:1px solid #e5e7eb;
+      box-shadow:0 8px 24px rgba(2,6,23,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:var(--blue);
+      font-weight:700;
+      font-size:22px;
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .grade-btn:hover{transform:translateY(-3px); box-shadow:0 14px 32px rgba(2,6,23,0.12)}
+
+    .eu-stars{margin-top:auto; background:var(--indigo-50); padding:18px 0;}
+    .stars-wrap{display:flex; justify-content:center; gap:10px;}
+    .star{font-size:28px; line-height:1; color:var(--yellow); filter: drop-shadow(0 1px 0 rgba(0,0,0,.2));}
+
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 16px; border-bottom:1px solid #e5e7eb;}
+    .topbar-left{display:flex; align-items:center; gap:12px;}
+    .back{appearance:none; border:none; background:var(--blue); color:white; border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer; box-shadow:0 6px 16px rgba(29,78,216,.3)}
+    .top-title{margin:0; font-size:20px; font-weight:800}
+
+    .rightbar{display:flex; align-items:center; gap:10px;}
+    .user-pill{font-size:13px; color:#0b1220; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:8px 10px; display:flex; align-items:center; gap:8px;}
+    .dot{width:8px; height:8px; border-radius:50%; background:#94a3b8; display:inline-block;}
+    .dot.admin{background:#22c55e;}
+
+    .btn{appearance:none; border:1px solid #e5e7eb; background:#fff; color:#111827; border-radius:12px; padding:8px 12px; font-weight:600; cursor:pointer; text-decoration:none;}
+    .btn.primary{background:var(--blue); color:#fff; border-color:transparent;}
+
+    .slots{width:min(1100px,92vw); margin:22px auto 40px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+    @media (max-width:900px){.slots{grid-template-columns:repeat(2,1fr);}}
+    @media (max-width:560px){.slots{grid-template-columns:1fr;}}
+
+    .slot{
+      min-height:150px;
+      border-radius:16px;
+      background:#ffffff;
+      border:1px dashed var(--blue);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+      text-align:center;
+      color:var(--blue);
+      transition:background .15s ease, box-shadow .15s ease;
+      cursor:pointer;
+    }
+    .slot:hover{background:#eef2ff; box-shadow:0 6px 18px rgba(29,78,216,.15)}
+    .slot.filled{border-style:solid; border-color:#e5e7eb; color:var(--text)}
+    .slot.readonly{cursor:default;}
+    .slot.readonly:hover{background:#fff; box-shadow:none;}
+
+    .card{width:100%; display:grid; grid-template-columns:56px 1fr auto; gap:12px; align-items:center;}
+    .thumb{width:56px; height:56px; border-radius:12px; background:#eef2ff; color:#1e3a8a; display:flex; align-items:center; justify-content:center; font-size:24px; flex:0 0 auto}
+    .meta{min-width:0; text-align:left; display:flex; flex-direction:column; gap:4px}
+    .name{font-weight:700; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%}
+    .desc{font-size:13px; color:var(--muted); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; max-height:3em}
+
+    dialog{border:none; padding:0; border-radius:16px; box-shadow:0 24px 60px rgba(2,6,23,.35); width:min(720px,94vw)}
+    dialog::backdrop{background:rgba(2,6,23,.45)}
+    .modal{padding:18px;}
+    .row{display:grid; grid-template-columns:140px 1fr; gap:12px; align-items:center; margin-top:12px;}
+    .label{text-align:right; font-size:14px; color:#64748b}
+    input[type="text"], textarea{width:100%; padding:10px 12px; border-radius:12px; border:1px solid #e5e7eb; font:inherit;}
+    textarea{min-height:90px; resize:vertical;}
+    .seg{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .help{font-size:12px; color:#64748b; margin-top:6px;}
+    .warn{font-size:12px; color:var(--danger); margin-top:10px;}
+    .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:16px;}
+
+    /* login */
+    .login-shell{padding:18px;}
+    .login-title{margin:0; font-size:18px; font-weight:800;}
+    .login-sub{margin:6px 0 0; color:var(--muted); font-size:13px;}
+    .login-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:14px;}
+  </style>
+</head>
+<body>
+  <!-- LOGIN GATE -->
+  <dialog id="login" aria-label="Login">
+    <form class="login-shell" method="dialog">
+      <h3 class="login-title">მომხმარებლის სახელი</h3>
+      <p class="login-sub">შეიყვანეთ სახელი.</p>
+      <div style="margin-top:12px">
+        <input id="loginName" type="text" placeholder="მაგ: Sandro" autocomplete="username" required />
+        <div id="loginErr" class="warn hidden">გთხოვთ შეიყვანოთ სახელი.</div>
+      </div>
+      <div class="login-actions">
+        <button class="btn primary" type="submit">შესვლა</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- HOME -->
+  <header id="home-header">
+    <h1>ევროპული სკოლის საბაზო საფეხურის წიგნები</h1>
+    <div class="subtitle">აირჩიეთ კლასის ბიბლიოთეკა</div>
+  </header>
+  <main id="home" aria-label="Homepage">
+    <div class="home-grid">
+      <button class="grade-btn" data-grade="6">6 კლასის წიგნები</button>
+      <button class="grade-btn" data-grade="7">7 კლასის წიგნები</button>
+      <button class="grade-btn" data-grade="8">8 კლასის წიგნები</button>
+    </div>
+  </main>
+
+  <!-- GRADE PAGE -->
+  <section id="grade-page" class="hidden" aria-label="Grade library">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="back" id="backBtn">← მთავარი</button>
+        <h2 class="top-title" id="gradeTitle">კლასის ბიბლიოთეკა</h2>
+      </div>
+      <div class="rightbar">
+        <button class="btn" id="changeUserBtn" type="button">მომხმარებლის შეცვლა</button>
+        <div class="user-pill" title="User status">
+          <span id="userDot" class="dot"></span>
+          <span id="userLabel">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="slots" id="slots"></div>
+  </section>
+
+  <footer class="eu-stars">
+    <div class="stars-wrap" aria-hidden="true">
+      <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+    </div>
+  </footer>
+
+  <!-- EDITOR (ADMIN ONLY) -->
+  <dialog id="editor" aria-label="Editor">
+    <form class="modal" method="dialog">
+      <h3 style="margin:0 0 8px; font-size:18px; font-weight:800">სლოტის რედაქტირება</h3>
+      <p class="login-sub">შეიყვანეთ სახელი PDF ბიბლიოთეკაში შესასვლელად.</p>
+      <input type="hidden" id="f-id" />
+      <input type="hidden" id="f-grade" />
+      <input type="hidden" id="f-slot" />
+
+      <div class="row">
+        <div class="label">სახელი</div>
+        <input id="f-name" type="text" placeholder="მაგ: მათემატიკა — თავი 1" required />
+      </div>
+
+      <div class="row">
+        <div class="label">აღწერა</div>
+        <textarea id="f-desc" placeholder="მოკლე აღწერა (არასავალდებულო)"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="label">PDF ტიპი</div>
+        <div class="seg">
+          <label><input type="radio" name="pdfType" value="link" checked> ბმული</label>
+          <label><input type="radio" name="pdfType" value="file"> ფაილი</label>
+        </div>
+      </div>
+
+      <div class="row" id="rowLink">
+        <div class="label">PDF ბმული</div>
+        <div>
+          <input id="f-url" type="text" placeholder="https://... (PDF link)" />
+          <div class="help">თუ არ წერ http/https-ს, სისტემა ავტომატურად დაამატებს.</div>
+        </div>
+      </div>
+
+      <div class="row hidden" id="rowFile">
+        <div class="label">PDF ფაილი</div>
+        <div>
+          <input id="f-pdf" type="file" accept="application/pdf" />
+          <div class="help">ფაილები ინახება ამავე ბრაუზერში (IndexedDB) და რჩება გადატვირთვის შემდეგაც.</div>
+        </div>
+      </div>
+
+      <div id="saveErr" class="warn hidden"></div>
+
+      <div class="modal-actions">
+        <button class="btn" value="cancel">გაუქმება</button>
+        <button class="btn primary" type="submit">შენახვა</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+  /********************
+   * Username / Admin  *
+   ********************/
+  const ADMIN_NAME = 'Tonispuri';
+  const USER_KEY = 'pdf_bank_username_v2';
+
+  const loginDlg = document.getElementById('login');
+  const loginName = document.getElementById('loginName');
+  const loginErr = document.getElementById('loginErr');
+  const changeUserBtn = document.getElementById('changeUserBtn');
+
+  const userLabel = document.getElementById('userLabel');
+  const userDot = document.getElementById('userDot');
+
+  let currentUser = '';
+  let isAdmin = false;
+
+  function setUser(name){
+    currentUser = (name || '').trim();
+    isAdmin = currentUser === ADMIN_NAME;
+    localStorage.setItem(USER_KEY, currentUser);
+    userLabel.textContent = isAdmin ? `${currentUser} (Admin)` : currentUser;
+    userDot.classList.toggle('admin', isAdmin);
+  }
+
+  function showLogin(){
+    loginErr.classList.add('hidden');
+    loginName.value = '';
+    try{ loginDlg.showModal(); }catch{}
+    setTimeout(()=> loginName.focus(), 50);
+  }
+
+  function ensureLogin(){
+    const stored = (localStorage.getItem(USER_KEY) || '').trim();
+    if(stored){ setUser(stored); return; }
+    showLogin();
+  }
+
+  loginDlg.querySelector('form').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = loginName.value.trim();
+    if(!name){ loginErr.classList.remove('hidden'); return; }
+    setUser(name);
+    loginDlg.close();
+    if(currentGrade) renderSlots();
+  });
+
+  changeUserBtn.addEventListener('click', ()=>{
+    localStorage.removeItem(USER_KEY);
+    showLogin();
+  });
+
+  /********************
+   * IndexedDB storage *
+   ********************/
+  const DB_NAME = 'pdf_bank_links_files_v2';
+  const DB_VERSION = 1;
+  const STORE = 'items';
+
+  function openDB(){
+    return new Promise((resolve, reject)=>{
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        const store = db.createObjectStore(STORE, { keyPath:'id', autoIncrement:true });
+        store.createIndex('by_grade', 'grade');
+        store.createIndex('by_grade_slot', ['grade','slotIndex'], { unique:true });
+      };
+      req.onsuccess = ()=> resolve(req.result);
+      req.onerror = ()=> reject(req.error);
+    });
+  }
+
+  function tx(mode, fn){
+    return openDB().then(db=> new Promise((resolve, reject)=>{
+      const t = db.transaction(STORE, mode);
+      const st = t.objectStore(STORE);
+      fn(st, t);
+      t.oncomplete = ()=> resolve();
+      t.onerror = ()=> reject(t.error);
+    }));
+  }
+
+  function getAllByGrade(grade){
+    return openDB().then(db=> new Promise((resolve, reject)=>{
+      const out=[];
+      const t = db.transaction(STORE, 'readonly');
+      const idx = t.objectStore(STORE).index('by_grade');
+      const range = IDBKeyRange.only(String(grade));
+      const curReq = idx.openCursor(range);
+      curReq.onsuccess = e=>{
+        const cur = e.target.result;
+        if(cur){ out.push(cur.value); cur.continue(); }
+        else resolve(out);
+      };
+      curReq.onerror = ()=> reject(curReq.error);
+    }));
+  }
+
+  function getByGradeSlot(grade, slotIndex){
+    return openDB().then(db=> new Promise((resolve, reject)=>{
+      const t = db.transaction(STORE, 'readonly');
+      const idx = t.objectStore(STORE).index('by_grade_slot');
+      const req = idx.get([String(grade), Number(slotIndex)]);
+      req.onsuccess = ()=> resolve(req.result || null);
+      req.onerror = ()=> reject(req.error);
+    }));
+  }
+
+  function putItem(item){
+    return tx('readwrite', (st)=> st.put(item));
+  }
+
+  /********************
+   * Navigation & UI   *
+   ********************/
+  const home = document.getElementById('home');
+  const homeHeader = document.getElementById('home-header');
+  const gradePage = document.getElementById('grade-page');
+  const gradeTitle = document.getElementById('gradeTitle');
+  const slotsEl = document.getElementById('slots');
+  const backBtn = document.getElementById('backBtn');
+
+  let currentGrade = null;
+  const TOTAL_SLOTS = 12;
+
+  document.querySelectorAll('.grade-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> openGrade(btn.dataset.grade));
+  });
+
+  backBtn.addEventListener('click', ()=>{
+    gradePage.classList.add('hidden');
+    home.classList.remove('hidden');
+    homeHeader.classList.remove('hidden');
+    currentGrade = null;
+    slotsEl.innerHTML = '';
+  });
+
+  async function openGrade(grade){
+    currentGrade = String(grade);
+    gradeTitle.textContent = `${grade} კლასის წიგნების ბიბლიოთეკა`;
+    home.classList.add('hidden');
+    homeHeader.classList.add('hidden');
+    gradePage.classList.remove('hidden');
+    await renderSlots();
+  }
+
+  function normalizeUrl(url){
+    let u = (url || '').trim();
+    if(!u) return '';
+    if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+    return u;
+  }
+
+  // This is the key: pressing "გახსნა" ALWAYS opens the PDF.
+  function openPdfItem(item){
+    if(!item) return;
+
+    // file-based
+    if(item.pdfType === 'file'){
+      if(!item.pdfBlob){ alert('PDF ფაილი ვერ მოიძებნა'); return; }
+      const blobUrl = URL.createObjectURL(item.pdfBlob);
+      const w = window.open(blobUrl, '_blank', 'noopener');
+      // keep it alive long enough for the new tab to load
+      setTimeout(()=> URL.revokeObjectURL(blobUrl), 60_000);
+      if(!w){
+        // fallback: same-tab open
+        location.href = blobUrl;
+      }
+      return;
+    }
+
+    // link-based
+    const u = normalizeUrl(item.pdfUrl);
+    if(!u){ return; }
+
+    try{
+      const w = window.open(u, '_blank', 'noopener');
+      if(!w){
+        const a = document.createElement('a');
+        a.href = u;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    }catch(e){
+      location.href = u;
+    }
+  }
+
+  function renderOpenButton(item){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn';
+    btn.textContent = 'გახსნა';
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); openPdfItem(item); });
+    return btn;
+  }
+
+  async function renderSlots(){
+    slotsEl.innerHTML = '';
+    const items = await getAllByGrade(currentGrade);
+    const bySlot = new Map(items.map(it=>[Number(it.slotIndex), it]));
+
+    for(let i=0;i<TOTAL_SLOTS;i++){
+      const data = bySlot.get(i) || null;
+      const slot = document.createElement('div');
+      slot.className = 'slot' + (data ? ' filled' : '');
+      if(!isAdmin) slot.classList.add('readonly');
+
+      if(!data){
+        slot.innerHTML = `<div><div style="font-weight:800;">ცარიელი სლოტი #${i+1}</div><div style="font-size:13px;color:#64748b;">${isAdmin ? 'დააწკაპუნეთ დასამატებლად' : 'ცარიელია'}</div></div>`;
+        if(isAdmin){
+          slot.addEventListener('click', ()=> openEditor({ grade: currentGrade, slotIndex: i }));
+        }
+      } else {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.textContent = '📄';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = data.name || 'დოკუმენტი';
+
+        const desc = document.createElement('div');
+        desc.className = 'desc';
+        const typeLabel = data.pdfType === 'file' ? 'ფაილი' : 'ბმული';
+        const typeDetail = data.pdfType === 'file' ? (data.fileName || 'PDF') : (data.pdfUrl || '');
+        desc.textContent = (data.description || '').trim() ? data.description : `${typeLabel}: ${typeDetail}`;
+        meta.append(name, desc);
+
+        const actions = document.createElement('div');
+        actions.append(renderOpenButton(data));
+
+        card.append(thumb, meta, actions);
+        slot.append(card);
+
+        if(isAdmin){
+          slot.addEventListener('click', ()=> openEditor(data));
+        }
+      }
+
+      slotsEl.append(slot);
+    }
+  }
+
+  /********************
+   * Editor (admin)    *
+   ********************/
+  const editor = document.getElementById('editor');
+  const fId = document.getElementById('f-id');
+  const fGrade = document.getElementById('f-grade');
+  const fSlot = document.getElementById('f-slot');
+  const fName = document.getElementById('f-name');
+  const fDesc = document.getElementById('f-desc');
+  const fUrl = document.getElementById('f-url');
+  const fPdf = document.getElementById('f-pdf');
+  const rowLink = document.getElementById('rowLink');
+  const rowFile = document.getElementById('rowFile');
+  const saveErr = document.getElementById('saveErr');
+
+  function getSelectedType(){
+    return document.querySelector('input[name="pdfType"]:checked')?.value || 'link';
+  }
+  function setSelectedType(v){
+    const el = document.querySelector(`input[name="pdfType"][value="${v}"]`);
+    if(el) el.checked = true;
+    updateTypeUI();
+  }
+  function updateTypeUI(){
+    const t = getSelectedType();
+    rowLink.classList.toggle('hidden', t !== 'link');
+    rowFile.classList.toggle('hidden', t !== 'file');
+  }
+  document.querySelectorAll('input[name="pdfType"]').forEach(r=> r.addEventListener('change', updateTypeUI));
+
+  function openEditor(data){
+    if(!isAdmin){ alert('b'); return; }
+    saveErr.classList.add('hidden');
+    saveErr.textContent = '';
+
+    fId.value = data.id ? String(data.id) : '';
+    fGrade.value = data.grade || currentGrade;
+    fSlot.value = String(data.slotIndex ?? 0);
+
+    fName.value = data.name || '';
+    fDesc.value = data.description || '';
+
+    // reset inputs
+    fUrl.value = data.pdfUrl || '';
+    try{ fPdf.value = ''; }catch{}
+
+    setSelectedType(data.pdfType || 'link');
+    editor.showModal();
+  }
+
+  editor.querySelector('form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(!isAdmin) return;
+
+    let id = fId.value ? Number(fId.value) : undefined;
+    const grade = String(fGrade.value);
+    const slotIndex = Number(fSlot.value);
+
+    const name = fName.value.trim();
+    const description = fDesc.value.trim();
+    const pdfType = getSelectedType();
+
+    if(!name){ saveErr.textContent = 'შეიყვანეთ სახელი.'; saveErr.classList.remove('hidden'); return; }
+
+    // if new, reuse existing record for the same slot
+    if(id === undefined){
+      const existingBySlot = await getByGradeSlot(grade, slotIndex);
+      if(existingBySlot) id = existingBySlot.id;
+    }
+
+    const existing = (id !== undefined && !Number.isNaN(id)) ? (await getAllByGrade(grade)).find(x=>x.id===id) : null;
+
+    const item = {
+      grade, slotIndex,
+      name, description,
+      pdfType,
+      createdAt: existing?.createdAt || Date.now()
+    };
+    if(id !== undefined && !Number.isNaN(id)) item.id = id;
+
+    if(pdfType === 'link'){
+      const u = normalizeUrl(fUrl.value);
+      if(!u){ saveErr.textContent='შეიყვანეთ PDF ბმული.'; saveErr.classList.remove('hidden'); return; }
+      try{ new URL(u); }catch{ saveErr.textContent='ბმული არასწორია.'; saveErr.classList.remove('hidden'); return; }
+      item.pdfUrl = u;
+      item.pdfBlob = null;
+      item.fileName = null;
+    } else {
+      const file = fPdf.files && fPdf.files[0];
+      if(file){
+        if(file.type !== 'application/pdf'){
+          saveErr.textContent='აირჩიეთ PDF ფაილი.'; saveErr.classList.remove('hidden'); return;
+        }
+        item.pdfBlob = file;
+        item.fileName = file.name || 'PDF';
+      } else if(existing && existing.pdfType === 'file' && existing.pdfBlob){
+        // keep old file if user didn't pick a new one
+        item.pdfBlob = existing.pdfBlob;
+        item.fileName = existing.fileName || 'PDF';
+      } else {
+        saveErr.textContent='აირჩიეთ PDF ფაილი.'; saveErr.classList.remove('hidden'); return;
+      }
+      item.pdfUrl = null;
+    }
+
+    try{
+      await putItem(item);
+      editor.close();
+      await renderSlots();
+    }catch(err){
+      console.error(err);
+      saveErr.textContent = 'შენახვის შეცდომა: ' + (err?.message || err);
+      saveErr.classList.remove('hidden');
+    }
+  });
+
+  // Boot
+  ensureLogin();
+  // Keep initial focus on first grade for keyboard
+  document.querySelectorAll('.grade-btn')[0]?.focus();
+  </script>
+</body>
+</html>
