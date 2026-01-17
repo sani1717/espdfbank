@@ -177,7 +177,8 @@
   <dialog id="editor" aria-label="Editor">
     <form class="modal" method="dialog">
       <h3 style="margin:0 0 8px; font-size:18px; font-weight:800">სლოტის რედაქტირება</h3>
-      <p class="login-sub">შეიყვანეთ სახელი PDF ბიბლიოთეკაში შესასვლელად.</p>
+      <p class="login-sub">რედაქტირების უფლება აქვს მხოლოდ ადმინისტრატორს.</p>
+
       <input type="hidden" id="f-id" />
       <input type="hidden" id="f-grade" />
       <input type="hidden" id="f-slot" />
@@ -226,6 +227,25 @@
   </dialog>
 
   <script>
+  /********************
+   * Seed data (Grade 8)
+   * This makes the 8th grade slots pre-filled everywhere (all devices)
+   ********************/
+  const SEED_ITEMS = [
+    { grade: '8', slotIndex: 0, name: 'ქართული I', pdfType: 'link', pdfUrl: 'https://www.calameo.com/read/00563012046abee5b9c2e', description: '' },
+    { grade: '8', slotIndex: 1, name: 'ქართული II', pdfType: 'link', pdfUrl: 'https://www.calameo.com/read/0056301207d41a8e8f999', description: '' },
+    { grade: '8', slotIndex: 2, name: 'ქართული გრამატიკა', pdfType: 'link', pdfUrl: 'https://www.calameo.com/read/005630120fd61c72fabf5', description: '' },
+    { grade: '8', slotIndex: 3, name: 'ისტორია', pdfType: 'link', pdfUrl: 'https://drive.google.com/file/d/1gYJy3ntHKAtAvY8J_XzpYUKK1svOeJG1/view', description: '' },
+    { grade: '8', slotIndex: 4, name: 'გეოგრაფია 8', pdfType: 'link', pdfUrl: 'https://fliphtml5.com/njlgv/owsb/%E1%83%92%E1%83%94%E1%83%9D%E1%83%92%E1%83%A0%E1%83%90%E1%83%A4%E1%83%98%E1%83%90_8_-_%E1%83%9B%E1%83%9D%E1%83%A1%E1%83%AC%E1%83%90%E1%83%95%E1%83%9A%E1%83%98%E1%83%A1_%E1%83%AC%E1%83%98%E1%83%92%E1%83%9C%E1%83%98/171/', description: '' },
+    { grade: '8', slotIndex: 5, name: 'ისტორია რვეული', pdfType: 'link', pdfUrl: 'https://drive.google.com/file/d/1-9qb5ycKcXQdFDMBKLpUUYsy2qvUX4Ef/view', description: '' },
+    { grade: '8', slotIndex: 6, name: 'რუსული წიგნი', pdfType: 'link', pdfUrl: 'https://drive.google.com/file/d/1QyxeUxxbfLGeTiW0KUfciT_NsYcCzUJ0/view', description: '' },
+    { grade: '8', slotIndex: 7, name: 'რუსული რვეული', pdfType: 'link', pdfUrl: 'https://drive.google.com/file/d/1etJe3A26kjIDStH6NP-Eczn3KGe6lG3b/view', description: '' },
+    { grade: '8', slotIndex: 8, name: 'ინგლისური წიგნი', pdfType: 'link', pdfUrl: 'https://online.fliphtml5.com/jhjed/ytcv/#p=1', description: '' },
+    { grade: '8', slotIndex: 9, name: 'ინგლისური რვეული', pdfType: 'link', pdfUrl: 'https://www.scribd.com/document/821288122/FOCUS-2-WORKBOOK', description: '' },
+    { grade: '8', slotIndex: 10, name: 'ქიმია', pdfType: 'link', pdfUrl: 'https://saqmatsne.ge/wp-content/uploads/2020/06/Qimia_08_stud.pdf', description: '' },
+    { grade: '8', slotIndex: 11, name: 'ბიოლოგია II', pdfType: 'link', pdfUrl: 'https://www.scribd.com/document/498646570/%E1%83%9B%E1%83%9D%E1%83%A1%E1%83%AC%E1%83%90%E1%83%95%E1%83%9A%E1%83%98%E1%83%A1-%E1%83%AC%E1%83%98%E1%83%92%E1%83%9C%E1%83%98-%E1%83%91%E1%83%98%E1%83%9D%E1%83%9A%E1%83%9D%E1%83%92%E1%83%98%E1%83%90-8-%E1%83%99%E1%83%9A%E1%83%90%E1%83%A1%E1%83%98-%E1%83%9C%E1%83%90%E1%83%AC%E1%83%98%E1%83%9A%E1%83%98-2', description: '' },
+  ];
+
   /********************
    * Username / Admin  *
    ********************/
@@ -281,7 +301,7 @@
   /********************
    * IndexedDB storage *
    ********************/
-  const DB_NAME = 'pdf_bank_links_files_v2';
+  const DB_NAME = 'pdf_bank_links_files_v3';
   const DB_VERSION = 1;
   const STORE = 'items';
 
@@ -336,7 +356,29 @@
   }
 
   function putItem(item){
-    return tx('readwrite', (st)=> st.put(item));
+    // IMPORTANT: do not supply invalid "id"; IndexedDB will auto-increment.
+    const safe = { ...item };
+    if(safe.id === undefined || safe.id === null || Number.isNaN(safe.id)) delete safe.id;
+    return tx('readwrite', (st)=> st.put(safe));
+  }
+
+  async function seedIfMissing(){
+    // only seed items that do not already exist
+    for(const it of SEED_ITEMS){
+      const existing = await getByGradeSlot(it.grade, it.slotIndex);
+      if(existing) continue;
+      await putItem({
+        grade: it.grade,
+        slotIndex: it.slotIndex,
+        name: it.name,
+        description: it.description || '',
+        pdfType: 'link',
+        pdfUrl: it.pdfUrl,
+        pdfBlob: null,
+        fileName: null,
+        createdAt: Date.now()
+      });
+    }
   }
 
   /********************
@@ -380,38 +422,27 @@
     return u;
   }
 
-  // This is the key: pressing "გახსნა" ALWAYS opens the PDF.
   function openPdfItem(item){
     if(!item) return;
 
-    // file-based
     if(item.pdfType === 'file'){
       if(!item.pdfBlob){ alert('PDF ფაილი ვერ მოიძებნა'); return; }
       const blobUrl = URL.createObjectURL(item.pdfBlob);
       const w = window.open(blobUrl, '_blank', 'noopener');
-      // keep it alive long enough for the new tab to load
       setTimeout(()=> URL.revokeObjectURL(blobUrl), 60_000);
-      if(!w){
-        // fallback: same-tab open
-        location.href = blobUrl;
-      }
+      if(!w) location.href = blobUrl;
       return;
     }
 
-    // link-based
     const u = normalizeUrl(item.pdfUrl);
-    if(!u){ return; }
+    if(!u) return;
 
     try{
       const w = window.open(u, '_blank', 'noopener');
       if(!w){
         const a = document.createElement('a');
-        a.href = u;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        document.body.appendChild(a); a.click(); a.remove();
       }
     }catch(e){
       location.href = u;
@@ -510,7 +541,7 @@
   document.querySelectorAll('input[name="pdfType"]').forEach(r=> r.addEventListener('change', updateTypeUI));
 
   function openEditor(data){
-    if(!isAdmin){ alert('b'); return; }
+    if(!isAdmin){ alert('რედაქტირების უფლება არ გაქვთ.'); return; }
     saveErr.classList.add('hidden');
     saveErr.textContent = '';
 
@@ -521,7 +552,6 @@
     fName.value = data.name || '';
     fDesc.value = data.description || '';
 
-    // reset inputs
     fUrl.value = data.pdfUrl || '';
     try{ fPdf.value = ''; }catch{}
 
@@ -533,7 +563,7 @@
     e.preventDefault();
     if(!isAdmin) return;
 
-    let id = fId.value ? Number(fId.value) : undefined;
+    const id = fId.value ? Number(fId.value) : undefined;
     const grade = String(fGrade.value);
     const slotIndex = Number(fSlot.value);
 
@@ -543,21 +573,16 @@
 
     if(!name){ saveErr.textContent = 'შეიყვანეთ სახელი.'; saveErr.classList.remove('hidden'); return; }
 
-    // if new, reuse existing record for the same slot
-    if(id === undefined){
-      const existingBySlot = await getByGradeSlot(grade, slotIndex);
-      if(existingBySlot) id = existingBySlot.id;
-    }
-
-    const existing = (id !== undefined && !Number.isNaN(id)) ? (await getAllByGrade(grade)).find(x=>x.id===id) : null;
+    // reuse existing slot record if it exists
+    const existingBySlot = await getByGradeSlot(grade, slotIndex);
 
     const item = {
+      id: (existingBySlot?.id ?? id),
       grade, slotIndex,
       name, description,
       pdfType,
-      createdAt: existing?.createdAt || Date.now()
+      createdAt: existingBySlot?.createdAt || Date.now()
     };
-    if(id !== undefined && !Number.isNaN(id)) item.id = id;
 
     if(pdfType === 'link'){
       const u = normalizeUrl(fUrl.value);
@@ -574,10 +599,9 @@
         }
         item.pdfBlob = file;
         item.fileName = file.name || 'PDF';
-      } else if(existing && existing.pdfType === 'file' && existing.pdfBlob){
-        // keep old file if user didn't pick a new one
-        item.pdfBlob = existing.pdfBlob;
-        item.fileName = existing.fileName || 'PDF';
+      } else if(existingBySlot && existingBySlot.pdfType === 'file' && existingBySlot.pdfBlob){
+        item.pdfBlob = existingBySlot.pdfBlob;
+        item.fileName = existingBySlot.fileName || 'PDF';
       } else {
         saveErr.textContent='აირჩიეთ PDF ფაილი.'; saveErr.classList.remove('hidden'); return;
       }
@@ -596,9 +620,12 @@
   });
 
   // Boot
-  ensureLogin();
-  // Keep initial focus on first grade for keyboard
-  document.querySelectorAll('.grade-btn')[0]?.focus();
+  (async ()=>{
+    ensureLogin();
+    // Seed grade 8 links so they're visible everywhere (including other devices)
+    try{ await seedIfMissing(); }catch(e){ console.warn('Seeding failed', e); }
+    document.querySelectorAll('.grade-btn')[0]?.focus();
+  })();
   </script>
 </body>
 </html>
