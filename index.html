@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ევროპული სკოლის საბაზო საფეხურის წიგნები 17</title>
+  <title>ევროპული სკოლის საბაზო საფეხურის წიგნები</title>
   <style>
     :root{
       --blue:#1d4ed8;
@@ -262,15 +262,15 @@
     { grade:'8', slotIndex:1, name:'ქართული II', pdfType:'link', pdfUrl:'https://www.calameo.com/read/0056301207d41a8e8f999', description:'' },
     { grade:'8', slotIndex:2, name:'ქართული გრამატიკა', pdfType:'link', pdfUrl:'https://www.calameo.com/read/005630120fd61c72fabf5', description:'' },
     { grade:'8', slotIndex:3, name:'ისტორია', pdfType:'link', pdfUrl:'https://drive.google.com/file/d/1gYJy3ntHKAtAvY8J_XzpYUKK1svOeJG1/view', description:'' },
-    { grade:'8', slotIndex:4, name:'გეოგრაფია 8', pdfType:'link', pdfUrl:'https://fliphtml5.com/njlgv/owsb/%E1%83%92%E1%83%94%E1%83%9D%E1%83%92%E1%83%A0%E1%83%90%E1%83%A4%E1%83%98%E1%83%90_8_-_%E1%83%9B%E1%83%9D%E1%83%A1%E1%83%AC%E1%83%90%E1%83%95%E1%83%9A%E1%83%98%E1%83%A1_%E1%83%AC%E1%83%98%E1%83%92%E1%83%9C%E1%83%98/171/', description:'' },
-    { grade:'8', slotIndex:5, name:'ფიზიკა წიგნი', pdfType:'link', pdfUrl:'https://drive.google.com/drive/u/0/folders/1cSbDroJW2jE4Z7aIeNJbdIhCsDyX1gUB', description:'' },
+    { grade:'8', slotIndex:4, name:'გეოგრაფია 8', pdfType:'link', pdfUrl:'https://fliphtml5.com/njlgv/owsb/გეოგრაფია_8_-_მოსწავლის_წიგნი/171/', description:'' },
+    { grade:'8', slotIndex:5, name:'ისტორია რვეული', pdfType:'link', pdfUrl:'https://drive.google.com/file/d/1-9qb5ycKcXQdFDMBKLpUUYsy2qvUX4Ef/view', description:'' },
     { grade:'8', slotIndex:6, name:'რუსული წიგნი', pdfType:'link', pdfUrl:'https://drive.google.com/file/d/1QyxeUxxbfLGeTiW0KUfciT_NsYcCzUJ0/view', description:'' },
     { grade:'8', slotIndex:7, name:'რუსული რვეული', pdfType:'link', pdfUrl:'https://drive.google.com/file/d/1etJe3A26kjIDStH6NP-Eczn3KGe6lG3b/view', description:'' },
     { grade:'8', slotIndex:8, name:'ინგლისური წიგნი', pdfType:'link', pdfUrl:'https://online.fliphtml5.com/jhjed/ytcv/#p=1', description:'' },
     { grade:'8', slotIndex:9, name:'ინგლისური რვეული', pdfType:'link', pdfUrl:'https://www.scribd.com/document/821288122/FOCUS-2-WORKBOOK', description:'' },
     { grade:'8', slotIndex:10, name:'ქიმია', pdfType:'link', pdfUrl:'https://saqmatsne.ge/wp-content/uploads/2020/06/Qimia_08_stud.pdf', description:'' },
-    { grade:'8', slotIndex:11, name:'ბიოლოგია II', pdfType:'link', pdfUrl:'https://www.scribd.com/document/498646570/%E1%83%9B%E1%83%9D%E1%83%A1%E1%83%AC%E1%83%90%E1%83%95%E1%83%9A%E1%83%98%E1%83%A1-%E1%83%AC%E1%83%98%E1%83%92%E1%83%9C%E1%83%98-%E1%83%91%E1%83%98%E1%83%9D%E1%83%9A%E1%83%9D%E1%83%92%E1%83%98%E1%83%90-8-%E1%83%99%E1%83%9A%E1%83%90%E1%83%A1%E1%83%98-%E1%83%9C%E1%83%90%E1%83%AC%E1%83%98%E1%83%9A%E1%83%98-2', description:'' }
-    // Slots 12–14 are now available (3 extra slots)
+    { grade:'8', slotIndex:11, name:'ბიოლოგია II', pdfType:'link', pdfUrl:'https://www.scribd.com/document/498646570/მოსწავლის-წიგნი-ბიოლოგია-8-კლასი-ნაწილი-2', description:'' },
+    { grade:'8', slotIndex:12, name:'ფიზიკა წიგნი', pdfType:'link', pdfUrl:'https://drive.google.com/drive/u/0/folders/1cSbDroJW2jE4Z7aIeNJbdIhCsDyX1gUB', description:'' }
   ];
 
   /********************
@@ -397,14 +397,7 @@
   const backBtn = document.getElementById('backBtn');
 
   let currentGrade = null;
-
-  // Per-grade slot counts (8th grade gets +3 slots)
-  const TOTAL_SLOTS_BY_GRADE = { '6': 12, '7': 12, '8': 15 };
-  const DEFAULT_TOTAL_SLOTS = 12;
-
-  function totalSlotsForGrade(grade){
-    return TOTAL_SLOTS_BY_GRADE[String(grade)] ?? DEFAULT_TOTAL_SLOTS;
-  }
+  const TOTAL_SLOTS = 15;
 
   document.querySelectorAll('.grade-btn').forEach(btn=>{
     btn.addEventListener('click', ()=> openGrade(btn.dataset.grade));
@@ -434,6 +427,7 @@
     return u;
   }
 
+  // pressing "გახსნა" ALWAYS opens the PDF
   function openPdfItem(item){
     if(!item) return;
 
@@ -479,9 +473,7 @@
     const items = await getAllByGrade(currentGrade);
     const bySlot = new Map(items.map(it=>[Number(it.slotIndex), it]));
 
-    const totalSlots = totalSlotsForGrade(currentGrade);
-
-    for(let i=0;i<totalSlots;i++){
+    for(let i=0;i<TOTAL_SLOTS;i++){
       const data = bySlot.get(i) || null;
       const slot = document.createElement('div');
       slot.className = 'slot' + (data ? ' filled' : '');
@@ -662,9 +654,7 @@
       await seedListIfMissing(SEED_ITEMS_GRADE_6);
       await seedListIfMissing(SEED_ITEMS_GRADE_7);
       await seedListIfMissing(SEED_ITEMS_GRADE_8);
-    }catch(e){
-      console.warn('Seeding failed', e);
-    }
+    }catch(e){ console.warn('Seeding failed', e); }
   })();
 
   document.querySelectorAll('.grade-btn')[0]?.focus();
